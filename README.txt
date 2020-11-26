@@ -1,6 +1,6 @@
 # Multi-page TIFF
 
-![image](https://raw.githubusercontent.com/mpascucci/multipagetiff/master/imgs/output_16_0.png)
+![image](https://github.com/mpascucci/multipagetiff/raw/master/imgs/output_19_0.png)
 
 This module module makes easy dealing with multi-page tiff images stacks.
 
