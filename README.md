@@ -97,14 +97,6 @@ mp = tiff.flatten(st)
 plt.imshow(mp)
 ```
 
-
-
-
-    <matplotlib.image.AxesImage at 0x11aa9b208>
-
-
-
-
 ![png](imgs/output_14_1.png)
 
 
