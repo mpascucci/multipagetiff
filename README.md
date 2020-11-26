@@ -1,12 +1,19 @@
-`multipagetiff` is a small python module that makes easy deaing with multipage tiff images stacks.
+# Multi-page TIFF utility for Python
+
+`multipagetiff` is a python module that makes easy dealing with multi-page tiff images stacks.
 It implements depth color-coding by max-projection, like the Z-projection functions of ImageJ.
 
+# Install
+instal with `pip`
+```sh
+pip install multipagetiff
+```
 
-# `multipagetiff` example
+## `multipagetiff` example
 
 
 ```python
-from multipagetiff import Stack, tools
+import multipagetiff as tiff
 import numpy as np
 from matplotlib import pyplot as plt
 ```
@@ -15,7 +22,7 @@ from matplotlib import pyplot as plt
 
 
 ```python
-st = Stack('Stack.tiff', dx=1, dz=1, units='mm')
+st = tiff.Stack('Stack.tiff', dx=1, dz=1, units='mm')
 
 print("the stack has {} pages".format(len(st))) # number of frames
 ```
@@ -46,7 +53,7 @@ Display the frame of the stack with the plot_frames function
 
 
 ```python
-tools.plot_frames(st, cmap='gray')
+tiff.plot_frames(st, cmap='gray')
 ```
 
 
@@ -57,7 +64,7 @@ tools.plot_frames(st, cmap='gray')
 
 
 ```python
-cc = tools.color_code(st)
+cc = tiff.color_code(st)
 
 plt.subplot(1,3,1)
 plt.imshow(cc[0])
@@ -74,7 +81,7 @@ plt.tight_layout()
 
 
 ```python
-tools.plot_frames(st, colorcoded=True)
+tiff.plot_frames(st, colorcoded=True)
 ```
 
 
@@ -87,7 +94,7 @@ Create a color coded RGB image representing frame-depth. The image is the max pr
 
 
 ```python
-mp = tools.flatten(st)
+mp = tiff.flatten(st)
 plt.imshow(mp)
 ```
 
@@ -106,7 +113,7 @@ plot the max projection, together with its colorbar
 
 
 ```python
-tools.plot_flatten(st)
+tiff.plot_flatten(st)
 ```
 
 
@@ -119,8 +126,8 @@ Use a matplotlib preset colormap
 
 
 ```python
-tools.set_cmap(plt.cm.cool)
-tools.plot_flatten(st)
+tiff.set_cmap(plt.cm.cool)
+tiff.plot_flatten(st)
 ```
 
 
@@ -135,8 +142,8 @@ from matplotlib.colors import LinearSegmentedColormap
 
 my_colors = [(1,0,0),(0,1,0),(0.0,0.5,1)]
 my_cmap = LinearSegmentedColormap.from_list("myCmap", my_colors, N=256)
-tools.set_cmap(my_cmap)
-tools.plot_flatten(st)
+tiff.set_cmap(my_cmap)
+tiff.plot_flatten(st)
 ```
 
 

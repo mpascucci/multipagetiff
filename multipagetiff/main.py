@@ -55,12 +55,13 @@ class Stack(Sequence):
     Each page is a numpy array.
     """
 
-    def __init__(self, path, dx, dz, title='', units='units'):
+    def __init__(self, path, dx, dz, title='', z_label='depth', z_units=''):
         """
         :param path: path to the tiff file
         :param dx: value of one pixel in physical units, on the transverse plane (X,Y)
         :param dz: value of one pixel in physical units, on the axial direction (Z)
-        :param units: physical units name
+        :param z_units: physical units of the z axis
+        :param z_label: label used for the color coding
         :param cmap: colormap used to repsresent the
         :param title:
         """
@@ -72,7 +73,8 @@ class Stack(Sequence):
         self.dx = dx
         self.dz = dz
         self.title = title
-        self.units = units
+        self.units = z_units
+        self.z_label = z_label
 
     def reverse(self):
         self._imgs = self.pages[::-1]

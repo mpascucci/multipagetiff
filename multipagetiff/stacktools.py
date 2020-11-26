@@ -97,7 +97,9 @@ def flatten(stack, threshold=0):
 
 def plot_flatten(stack, threshold=0):
     """
-    Plot the max projection and its color bar
+    Plot the max projection and its color bar.
+    The labels are taken from the stack object properties.
+
     :param stack:
     :param threshold: intensity values below the threshold are set to zero
     :return: None
@@ -112,7 +114,12 @@ def plot_flatten(stack, threshold=0):
     cb1 = colorbar.ColorbarBase(ax2, cmap=get_cmap(),
                                     norm=norm,
                                     orientation='vertical')
-    cb1.set_label(stack.units)
+   
+    if stack.z_label:
+        cb1.set_label("{}".format(stack.z_label))
+    if stack.units:
+        cb1.set_label("{} [{}]".format(stack.z_label, stack.units))
+        
 
 
 def plot_frames(stack, colorcoded=False, **kwargs):
@@ -128,10 +135,11 @@ def plot_frames(stack, colorcoded=False, **kwargs):
         imgs = stack.pages
 
     cols = min(len(stack), 5)
+    fig, axs = plt.subplots(int(np.floor(len(stack)/cols)), cols)
+    axs = axs.flatten()
     for i,img in enumerate(imgs):
-        plt.subplot(np.floor(len(stack)/cols), cols, i+1)
-        plt.imshow(img, **kwargs)
-        plt.title(i)
+        axs[i].imshow(img, **kwargs)
+        axs[i].set_title(i)
     plt.tight_layout()
 
 
