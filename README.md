@@ -78,6 +78,9 @@ plt.tight_layout()
 
 
 ```python
+# If you need to print only a part of the stack, select it with
+# st.set_start_in_units(start) and st.set_end_in_units(end)
+
 tiff.plot_frames(st, colorcoded=True)
 ```
 
