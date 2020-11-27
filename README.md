@@ -29,7 +29,7 @@ print("the stack has {} pages".format(len(st))) # number of frames
 
 ## plot a stack
 
-Plot page by page. The Stack object behaves like a list, whose elements are the frames
+Plot page by page. The Stack object behaves like a list, wihch elements are the frames.
 
 
 ```python
