@@ -13,7 +13,6 @@ pip install multipagetiff
 
 ```python
 import multipagetiff as tiff
-import numpy as np
 from matplotlib import pyplot as plt
 ```
 
@@ -21,8 +20,7 @@ from matplotlib import pyplot as plt
 
 
 ```python
-st = tiff.Stack('Stack.tiff', dx=1, dz=1, units='mm')
-
+st = tiff.Stack('Stack.tiff', dx=1, dz=1, z_label="depth", z_units='mm')
 print("the stack has {} pages".format(len(st))) # number of frames
 ```
 
