@@ -67,7 +67,11 @@ def color_code(stack, threshold=0):
     selection = stack.pages[stack.start_frame:stack.end_frame+1]
     rgb = np.zeros((*selection.shape, 3))
     for i, img in enumerate(selection):
-        img = (img-img.min())/(img.max()-img.min())
+        img_min = img.min()
+        img_max = img.max()
+        img_c = img_max - img_min
+        if (img_c != 0):
+            img = (img-img_min)/img_c
         img[img < threshold] = 0
         j = i/(stack.selection_length-1)
         rgb[i,:,:,0] = img*cmap(j)[0]
@@ -122,11 +126,12 @@ def plot_flatten(stack, threshold=0):
         
 
 
-def plot_frames(stack, colorcoded=False, **kwargs):
+def plot_frames(stack, frames=None, colorcoded=False, **kwargs):
     """
     Plot the frames of the stack.
     :param stack:
     :param colorcoded: the stack is color coded
+    :param frames: list of integer indicating the frames to plot
     :return: None
     """
     if colorcoded:
@@ -134,12 +139,31 @@ def plot_frames(stack, colorcoded=False, **kwargs):
     else:
         imgs = stack.pages
 
-    cols = min(len(stack), 5)
-    fig, axs = plt.subplots(int(np.floor(len(stack)/cols)), cols)
-    axs = axs.flatten()
-    for i,img in enumerate(imgs):
-        axs[i].imshow(img, **kwargs)
-        axs[i].set_title(i)
+    MAX_IMGS = 36 # max images to show
+    
+    if frames is not None:
+        try:
+            iter(frames)
+        except TypeError:
+            raise TypeError("frames must be an iterable.")
+    else:
+        frames = range(len(imgs))
+
+    if len(frames) > MAX_IMGS:
+        frames=frames[:MAX_IMGS]
+
+    n_imgs = len(frames)
+
+    cols = min(n_imgs, 6)
+    rows = min(6, int(np.floor(n_imgs/cols))+1)
+
+    for j,i in enumerate(frames):
+        img=imgs[i]
+        plt.subplot(rows,cols,j+1)
+        plt.imshow(img, **kwargs)
+        plt.axis('off')
+        plt.text(0.05*img.shape[0],0.9*img.shape[1],str(i), {'bbox': dict(boxstyle="round", fc="white", ec="gray", pad=0.1)})
+
     plt.tight_layout()
 
 

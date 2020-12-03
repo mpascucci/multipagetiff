@@ -55,15 +55,21 @@ class Stack(Sequence):
     Each page is a numpy array.
     """
 
-    def __init__(self, path, dx, dz, title='', z_label='depth', z_units=''):
+    def __init__(self, path, dx, dz, title='', z_label='depth', units=''):
         """
         :param path: path to the tiff file
         :param dx: value of one pixel in physical units, on the transverse plane (X,Y)
         :param dz: value of one pixel in physical units, on the axial direction (Z)
-        :param z_units: physical units of the z axis
+        :param units: physical units of the z axis
         :param z_label: label used for the color coding
         :param cmap: colormap used to repsresent the
         :param title:
+
+        properties:
+        these properties can be modified
+        - crop: [x0,y0,x1,y1] defines a rectangle which crops the stack when plotting
+        - start_frame, end_frame : int, defines the first and last frame to use
+        - keyframe: the frame at which z=0
         """
         self._imgs = tiff2nparray(path)
         self.crop=[0,0,*self._imgs[0].shape]
@@ -73,7 +79,7 @@ class Stack(Sequence):
         self.dx = dx
         self.dz = dz
         self.title = title
-        self.units = z_units
+        self.units = units
         self.z_label = z_label
 
     def reverse(self):
