@@ -1,6 +1,6 @@
 # Multi-page TIFF utility for Python
 
-`multipagetiff` is a python module that makes easy dealing with multipage tiff stacks of images.
+`multipagetiff` is a python module that makes dealing with multipage tiff stacks of images easier.
 It implements depth color-coding by max-projection, like the Z-projection functions of ImageJ.
 
 # Install
@@ -11,7 +11,6 @@ pip install multipagetiff
 
 ## Usage example
 ```python
-import numpy as np
 from matplotlib import pyplot as plt
 import multipagetiff as tiff
 ```
@@ -144,6 +143,9 @@ plt.tight_layout()
 
 
 ```python
+# If you need to print only a part of the stack, select it with
+# st.set_start_in_units(start) and st.set_end_in_units(end)
+
 tiff.plot_frames(st, colorcoded=True)
 ```
 
