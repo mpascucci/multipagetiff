@@ -1,9 +1,10 @@
-# Multi-page TIFF utility for Python
+# Image stacks in Python (multi-page tiff)
 
 [![DOI](https://zenodo.org/badge/166888905.svg)](https://zenodo.org/badge/latestdoi/166888905)
 
-`multipagetiff` is a python module that makes easier working with multipage images (stacks).
-It implements depth color-coding by max-projection, like the Z-projection functions of ImageJ.
+`multipagetiff` is a python module that makes easier working with multipage images (stacks). Image stacks are often found as multi-page tiff files.
+
+With this module one can read, manipulate and display multi-page tiff files and apply depth color-coding by max-projection, like the Z-projection functions of ImageJ.
 
 # Install
 instal with `pip`
