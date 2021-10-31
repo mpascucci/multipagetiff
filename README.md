@@ -1,6 +1,6 @@
 # Image stacks in Python (multi-page tiff)
 
-please consider citing thi software : [![DOI](https://zenodo.org/badge/166888905.svg)](https://zenodo.org/badge/latestdoi/166888905)
+cite this software --> [![DOI](https://zenodo.org/badge/166888905.svg)](https://zenodo.org/badge/latestdoi/166888905)
 
 `multipagetiff` is a python module that makes easier working with multipage images (stacks). Image stacks are often found as multi-page tiff files.
 
