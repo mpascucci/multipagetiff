@@ -36,8 +36,20 @@ tiff.plot_frames(s, cmap='gray')
 
     
 ![png](imgs/output_4_0.png)
-    
 
+
+## Slicing and accessing single pages
+A Stack objects is an Iterable and it can be sliced (eg`s[0:4]` will return the pages 0 to 3 as numpy array)
+
+Numpy methods can be called on `s.pages` or simply `s[:]`.
+For example, the mean image of the stack can be calculated as follows:
+```
+mean_img = stack.pages.mean(axis=0))
+```
+or
+```
+mean_img = stack[:].mean(axis=0))
+```
 
 ## z max-projection
 
