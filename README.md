@@ -44,11 +44,11 @@ A Stack objects is an Iterable and it can be sliced (eg`s[0:4]` will return the 
 Numpy methods can be called on `s.pages` or simply `s[:]`.
 For example, the mean image of the stack can be calculated as follows:
 ```
-mean_img = stack.pages.mean(axis=0))
+mean_img = s.pages.mean(axis=0))
 ```
 or
 ```
-mean_img = stack[:].mean(axis=0))
+mean_img = s[:].mean(axis=0))
 ```
 
 ## z max-projection
