@@ -12,12 +12,12 @@ def estimate_zero_padding(img):
     # horizontal
     th_img = img.sum(axis=0) != 0
     nonzero_indx = _np.argwhere(th_img).squeeze()
-    res['h'] = (nonzero_indx[0], nonzero_indx[-1])
+    res['h'] = (int(nonzero_indx[0]), int(nonzero_indx[-1]))
 
     # vertical
     th_img = img.sum(axis=1) != 0
     nonzero_indx = _np.argwhere(th_img).squeeze()
-    res['v'] = (nonzero_indx[0], nonzero_indx[-1])
+    res['v'] = (int(nonzero_indx[0]), int(nonzero_indx[-1]))
 
     return res
 

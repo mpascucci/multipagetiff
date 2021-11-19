@@ -95,6 +95,12 @@ class Stack(Sequence):
         self.end_page = self.keypage + round(end//self.dz)
 
     def _set_raw_images(self, images):
+        if type(images) != _np.ndarray:
+            try:
+                images = _np.ndarray(images)
+            except:
+                raise ValueError(
+                    "The images parameter is not a numpy array or is not convertible into one.")
         self._imgs = images
         self._crop = [0, len(images)-1, 0, images[0].shape[0],
                       0, images[0].shape[1]]
