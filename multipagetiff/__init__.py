@@ -25,5 +25,5 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-from .main import Stack, read_stack
+from .main import Stack
 from .stacktools import *

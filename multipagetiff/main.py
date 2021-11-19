@@ -26,36 +26,10 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from collections.abc import Sequence
-from PIL import Image
-import numpy as np
-
-
-def tiff2nparray(patj):
-    """Transform a multipage tiff in numpy array
-    :param path: path of the tiff file
-    :return: a numpy array of shape (n,h,w) where n is the number of pages of the tiff file
-    """
-    im = Image.open(patj)
-    i = 0
-    frames = []
-    try:
-        while True:
-            im.seek(i)
-            frames.append(np.array(im))
-            i += 1
-    except EOFError:
-        pass
-
-    return np.array(frames)
-
-
-def read_stack(path, dx=1, dz=1, title='', z_label='depth', units=''):
-    """Load a stack form a tif file.
-
-    :param path: (string) path to the tiff file
-    :return: a Stack object
-    """
-    return Stack(tiff2nparray(path), dx=dx, dz=dz, title=title, z_label=z_label, units='')
+from PIL.Image import new
+from matplotlib.pyplot import title
+import numpy as _np
+from numpy.lib.shape_base import hsplit
 
 
 class Stack(Sequence):
@@ -64,28 +38,24 @@ class Stack(Sequence):
     Each page is a numpy array.
     """
 
-    def __init__(self, imgs, dx=1, dz=1, title='', z_label='depth', units=''):
+    def __init__(self, imgs, dx=1, dz=1, title='', z_label='depth', units='units'):
         """
-        :param imgs: numpy array of shape (Nz, Nx, Ny) containing the frames of the stack
+        :param imgs: numpy array of shape (Nz, Nx, Ny) containing the raw images of the stack
         :param dx: value of one pixel in physical units, on the transverse plane (X,Y)
         :param dz: value of one pixel in physical units, on the axial direction (Z)
         :param units: physical units of the z axis
         :param z_label: label used for the color coding
-        :param cmap: colormap used to repsresent the
         :param title:
 
         properties:
-        these properties can be modified
-        - crop: [x0,y0,x1,y1] defines a rectangle which crops the stack when plotting
-        - start_frame, end_frame : int, defines the first and last frame to use
-        - keyframe: the frame at which z=0
+        - Stack.crop: [row0,row1,col0,col1] defines a rectangle which crops the stack pages
+        - Stack.start_page, end_page : (index) defines the first and last page to use
+        - Stack.keypage: the page at which z=0
+        - Stack.raw_images stores the raw image data.
+        - Stack.pages is a view of the stack images restricted by the specified crop and start/end pages
         """
 
-        self._imgs = imgs
-        self.crop = [0, 0, *self._imgs[0].shape]
-        self.keyframe = len(self)//2
-        self.start_frame = 0
-        self.end_frame = len(self) - 1
+        self._set_raw_images(imgs)
         self.dx = dx
         self.dz = dz
         self.title = title
@@ -94,37 +64,248 @@ class Stack(Sequence):
 
     def reverse(self):
         self._imgs = self.pages[::-1]
-        self.start_frame = len(self) - self.end_frame
-        self.end_frame = len(self) - self.start_frame
+        self.start_page = len(self) - self.end_page
+        self.end_page = len(self) - self.start_page
 
     def reduce(self, f=2):
         self._imgs = self.pages[::f]
         self.dz *= 2
-        self.keyframe = round(self.keyframe//f)
-        self.start_frame = round(self.start_frame//f)
-        self.end_frame = round(self.end_frame//f)
+        self.keypage = round(self.keypage//f)
+        self.start_page = round(self.start_page//f)
+        self.end_page = round(self.end_page//f)
+
+    def copy_props_from_stack(self, stack):
+        self.dx = stack.dx
+        self.dz = stack.dz
+        self.title = stack.title
+        self.units = stack.units
+        self.z_label = stack.z_label
+        self._crop = stack._crop
 
     def __getitem__(self, i):
         return self.pages[i]
 
     def __len__(self):
-        return self.pages.shape[0]
+        return self._crop[1] - self._crop[0] + 1
 
     def set_start_in_units(self, start):
-        self.start_frame = self.keyframe + round(start//self.dz) + 1
+        self.start_page = self.keypage + round(start//self.dz) + 1
 
     def set_end_in_units(self, end):
-        self.end_frame = self.keyframe + round(end//self.dz)
+        self.end_page = self.keypage + round(end//self.dz)
 
-    @property
+    def _set_raw_images(self, images):
+        self._imgs = images
+        self._crop = [0, len(images)-1, 0, images[0].shape[0],
+                      0, images[0].shape[1]]
+        self._last_crop = self._crop.copy()
+        self._lazy_pages = None
+        self.keypage = len(self)//2
+
+    def copy(self):
+        """Copy this stack into a new Stack instance"""
+        new_stack = Stack(self._imgs, dx=self.dx, dz=self.dz,
+                          title=self.title, z_label=self.z_label, units=self.units)
+
+        new_stack.copy_props_from_stack(self)
+
+        return new_stack
+
+    def apply_to_pages(self, f, **kwargs):
+        """Apply function f with the given kwargs to each page of a stack.
+        f is a function that accepts 2D arrays as input.
+
+        Return the results as a list."""
+        pages = self.pages.copy()
+        result = list()
+        for page in pages:
+            result.append(f(page, **kwargs))
+        return result
+
+    def apply(self, f, **kwargs):
+        """Apply a function to the pages of the stack as a 3D array.
+        f is a function accepting 3D a array as input
+
+        Return the result"""
+
+        return f(self.pages, **kwargs)
+
+    def __repr__(self):
+        d = dict(dx=self.dx, dz=self.dz, length=len(self),
+                 title='"{}" '.format(self.title) if self.title != '' else '', unit=self.units, crop=self._crop[2:], pages=self._crop[:2])
+        return "Multi-Page Stack {title}of {length} pages. (dx=dy={dx}{unit}, dz={dz}{unit}, crop={crop}], page limits={pages})".format(**d)
+
+    def set_selection(self, region_limits):
+        """Set crop and page limits for this stack.
+
+        region_limits is an iterable of 6 elements that specifies the crop in the following form:
+        [start_page, end_page, vertical_start,
+            vertical_end, horizontal_start, horizontal_end]
+
+        start and end value are indices.
+        start values are included, end values are excluded.
+
+        if any of the region_limits is None, the current value is kept.
+        """
+
+        assert len(region_limits) == 6
+
+        for i, limit in enumerate(region_limits):
+            if limit is not None:
+                self._crop[i] = limit
+
+    def reset_selection(self):
+        """reset the pages crop"""
+        h, w = self._imgs[0].shape
+        self._crop[2:] = [0, h, 0, w]
+
+    def reset_page_limits(self):
+        """reset the start/end pages"""
+        self._crop[0:2] = [0, len(self._imgs)]
+
+    def reset(self):
+        """Reset the stack pages to the raw data"""
+        self.reset_selection()
+        self.reset_page_limits()
+        self._lazy_pages = None
+
+    def overwrite_raw_images(self):
+        self._set_raw_images(self.pages)
+
+    def normalize(self, mode="all", output_dtype='same'):
+        """Normalize the gray levels of the stack.
+        Pixel values will be rescaled between MIN and MAX.
+        MIN and MAX are the limits of the specified output_datatype.
+
+        output_dtype is a numpy datatype specifier or 'same' (which indicates the same as input)
+
+        mode:
+        - all : the stack is normalized as one array
+        - page : each page of the stack is normalized independently
+
+
+        NOTE: The normalization is calculated and applied on the selected pages (cropped)
+        """
+
+        output_dtype = self.pages.dtype if output_dtype == 'same' else output_dtype
+
+        min_level = _np.iinfo(output_dtype).min
+        max_level = _np.iinfo(output_dtype).max
+
+        imgs = self.pages.astype(_np.float64)
+
+        imgs -= self.pages.min()
+        imgs /= self.pages.max() - self.pages.min()
+        imgs *= max_level + min_level
+        imgs -= min_level
+
+        self._lazy_pages = imgs.astype(output_dtype)
+
+    @ property
     def pages(self):
-        x, y, h, w = self.crop
-        return self._imgs[:, x:x+h, y:y+w]
+        crop_changed = self._crop != self._last_crop
 
-    @property
+        # if the crop region has been modified
+        if crop_changed or self._lazy_pages is None:
+            start, end, r0, r1, c0, c1 = self._crop
+            self._last_crop = self._crop.copy()
+            self._lazy_pages = self._imgs[start:end, r0:r1, c0:c1]
+
+        return self._lazy_pages
+
+    def _crop_setter(self, ar_slice, value):
+        """helper function for some property setters.
+        This function is there su ensure that the selection regions are properly set."""
+
+        # ensure iterability
+        try:
+            iter(value)
+        except:
+            value = [value]
+
+        exp_len = ar_slice.stop - ar_slice.start
+        assert len(value) == exp_len,\
+            "Expected an iterable of len({exp_len})".format()
+        crop = self._crop.copy()
+        crop[ar_slice] = value
+        self.set_selection(crop)
+
+    @ property
+    def crop(self):
+        return self._crop[2:]
+
+    @ crop.setter
+    def crop(self, v):
+        self._crop_setter(slice(2, 6), v)
+
+    @ property
+    def crop_vertical(self):
+        return self._crop[2:4]
+
+    @ crop_vertical.setter
+    def crop_vertical(self, v):
+        self._crop_setter(slice(2, 4), v)
+
+    @ property
+    def crop_horizontal(self):
+        return self._crop[4:6]
+
+    @ crop_horizontal.setter
+    def crop_horizontal(self, v):
+        self._crop_setter(slice(4, 6), v)
+
+    @ property
+    def start_page(self):
+        return self._crop[0]
+
+    @ start_page.setter
+    def start_page(self, v):
+        self._crop_setter(slice(0, 1), v)
+
+    @ property
+    def end_page(self):
+        return self._crop[1]
+
+    @ end_page.setter
+    def end_page(self, v):
+        self._crop_setter(slice(1, 2), v)
+
+    @ property
+    def page_limits(self):
+        return self._crop[0:2]
+
+    @ page_limits.setter
+    def page_limits(self, v):
+        self._crop_setter(slice(0, 2), v)
+
+    @ property
     def selection_length(self):
-        return self.end_frame - self.start_frame + 1
+        return self.end_page - self.start_page + 1
 
-    @property
+    @ property
     def range_in_units(self):
-        return np.array([self.start_frame-self.keyframe, self.end_frame-self.keyframe])*self.dz
+        return _np.array([self.start_page-self.keypage, self.end_page-self.keypage])*self.dz
+
+    @ property
+    def raw_images(self):
+        return self._imgs
+
+    @ raw_images.setter
+    def raw_images(self, images):
+        self._set_raw_images(images)
+
+    @ property
+    def max(self):
+        return self.pages.max()
+
+    @ property
+    def mean(self):
+        return self.pages.mean()
+
+    @ property
+    def min(self):
+        return self.pages.min()
+
+    @ property
+    def std(self):
+        return self.pages.std()

@@ -25,21 +25,76 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-from .main import read_stack
+from . import main as _stack
+from . import image_tools as _image_tools
 
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as _plt
 from matplotlib import colorbar, colors
-import numpy as np
-from types import SimpleNamespace
-
 import numpy as _np
+from types import SimpleNamespace as _SimpleNamespace
+
 import multiprocessing as _mp
 from tqdm import tqdm as _tqdm
 import functools as _ft
+from PIL import Image as _Image
 
-config = SimpleNamespace(
+
+config = _SimpleNamespace(
     cmap=None
 )
+
+
+def tiff2nparray(path):
+    """Transform a multipage tiff in numpy array
+    :param path: path of the tiff file
+    :return: a numpy array of shape (n,h,w) where n is the number of pages of the tiff file
+    """
+    im = _Image.open(path)
+    i = 0
+    frames = []
+    try:
+        while True:
+            im.seek(i)
+            frames.append(_np.array(im))
+            i += 1
+    except EOFError:
+        pass
+
+    return _np.array(frames)
+
+
+def read_stack(path, dx=1, dz=1, title='', z_label='depth', units=''):
+    """Load a stack form a tif file.
+
+    :param path: (string) path to the tiff file
+    :return: a Stack object
+    """
+    return _stack.Stack(tiff2nparray(path), dx=dx, dz=dz, title=title, z_label=z_label, units='')
+
+
+def write_stack(stack, path="untitled.tif"):
+    """Write the current pages of the stack as TIFF file"""
+    imlist = []
+    for m in stack.pages:
+        imlist.append(_Image.fromarray(m))
+
+    imlist[0].save(path, save_all=True, append_images=imlist[1:])
+
+
+def empty_like(stack, value=0):
+    """Create a new empty stack the same shape as stack
+
+    :param stack: The reference Stack
+    :type stack: multipagetiff.Stack
+    :param value: the new Stack will be filled with this value, defaults to 0
+    :type value: int, optional
+    :return: a new Stack
+    :rtype: multipagetiff.Stack
+    """
+    data = _np.zeros_like(stack.pages) + value
+    new_stack = _stack.Stack(data)
+    new_stack.copy_props_from_stack(stack)
+    return new_stack
 
 
 def get_cmap():
@@ -48,7 +103,7 @@ def get_cmap():
     :return: a pyplot colormap
     """
     if config.cmap is None:
-        return plt.cm.gist_rainbow
+        return _plt.cm.gist_rainbow
     else:
         return config.cmap
 
@@ -71,7 +126,7 @@ def color_code(stack, threshold=0):
     """
     cmap = get_cmap()
     selection = stack.pages[stack.start_frame:stack.end_frame+1]
-    rgb = np.zeros((*selection.shape, 3))
+    rgb = _np.zeros((*selection.shape, 3))
     for i, img in enumerate(selection):
         img_min = img.min()
         img_max = img.max()
@@ -96,8 +151,9 @@ def flatten(stack, threshold=0):
     :param threshold: intensity values below the threshold are set to zero
     :return: a numpy array
     """
-    idx = np.argmax(stack.pages[stack.start_frame:stack.end_frame + 1], axis=0)
-    out = np.zeros((*stack.pages.shape[1:], 3))
+    idx = _np.argmax(
+        stack.pages[stack.start_frame:stack.end_frame + 1], axis=0)
+    out = _np.zeros((*stack.pages.shape[1:], 3))
     rgb = color_code(stack, threshold=threshold)
     for i in range(out.shape[0]):
         for j in range(out.shape[1]):
@@ -115,8 +171,8 @@ def plot_flatten(stack, threshold=0):
     :return: None
     """
     n = 10
-    ax1 = plt.subplot2grid((n, n), (0, 0), colspan=n-1, rowspan=n)
-    ax2 = plt.subplot2grid((n, n), (0, n-1), colspan=1, rowspan=n)
+    ax1 = _plt.subplot2grid((n, n), (0, 0), colspan=n-1, rowspan=n)
+    ax2 = _plt.subplot2grid((n, n), (0, n-1), colspan=1, rowspan=n)
 
     ax1.imshow(flatten(stack, threshold=threshold))
     ax1.set_title(stack.title)
@@ -161,17 +217,17 @@ def plot_frames(stack, frames=None, colorcoded=False, **kwargs):
     n_imgs = len(frames)
 
     cols = min(n_imgs, 6)
-    rows = min(6, int(np.floor(n_imgs/cols))+1)
+    rows = min(6, int(_np.floor(n_imgs/cols))+1)
 
     for j, i in enumerate(frames):
         img = imgs[i]
-        plt.subplot(rows, cols, j+1)
-        plt.imshow(img, **kwargs)
-        plt.axis('off')
-        plt.text(0.05*img.shape[0], 0.9*img.shape[1], str(i),
-                 {'bbox': dict(boxstyle="round", fc="white", ec="gray", pad=0.1)})
+        _plt.subplot(rows, cols, j+1)
+        _plt.imshow(img, **kwargs)
+        _plt.axis('off')
+        _plt.text(0.05*img.shape[0], 0.9*img.shape[1], str(i),
+                  {'bbox': dict(boxstyle="round", fc="white", ec="gray", pad=0.1)})
 
-    plt.tight_layout()
+    _plt.tight_layout()
 
 
 def get_xz(stack, y, x=None, length=None, interpolation=1):
@@ -186,7 +242,7 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
     """
 
     if x is None:
-        x = np.floor((stack[0].shape[1]+1)//2)
+        x = _np.floor((stack[0].shape[1]+1)//2)
 
     if length is None:
         length = stack[0].shape[1]
@@ -198,7 +254,7 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
 
     length = end-start
 
-    xz = np.zeros((len(stack)*interpolation, length, 3))
+    xz = _np.zeros((len(stack)*interpolation, length, 3))
     for i, img in enumerate(color_code(stack)):
         for j in range(i*interpolation, (i+1)*interpolation):
             xz[j, :] = img[y, start:end]
@@ -207,14 +263,20 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
 
 
 def load_and_apply(path, f=_np.sum, f_args={'axis': 0}):
-    "Load a tif stack and apply f to it"
+    """Load a tif stack and apply f to it.
+
+    f is a function that takes as input the pages of a stack (i.e. a 3D numpy array)
+    """
     stack = read_stack(path, dx=1, dz=1)
-    mean_img = f(stack.pages, **f_args)
-    return mean_img
+    retval = f(stack.pages, **f_args)
+    return retval
 
 
 def load_and_apply_batch(paths, f=_np.sum, f_args={'axis': 0}, ncpu=None):
-    """Load tif stacks and apply a function to them"""
+    """Load tif stacks and apply function f to each of them.
+
+    f is a function that takes as input the pages of a stack (i.e. a 3D numpy array)
+    """
 
     f = _ft.partial(load_and_apply, f=f, f_args=f_args)
 
@@ -224,3 +286,21 @@ def load_and_apply_batch(paths, f=_np.sum, f_args={'axis': 0}, ncpu=None):
 
     with _mp.Pool(ncpu) as pool:
         return list(_tqdm(pool.imap(f, paths), total=len(paths), desc=f"Using {ncpu} CPUs"))
+
+
+def unpad_stack(stack):
+    """Unpad the stack by setting an appropriate crop.
+    The padding is estimated from the first page"""
+    pad = _image_tools.estimate_zero_padding(stack._imgs[0])
+    stack.crop = [pad['v'][0], pad['v'][1], pad['h'][0], pad['h'][1]]
+
+
+def plot_crop(stack, page=0, plot_axis=None, **kwargs):
+    """Plot the crop region over a raw image of the stack"""
+    plot_axis = _plt.gca if plot_axis is None else plot_axis
+    _plt.imshow(stack._imgs[page])
+    r0, r1, c0, c1 = stack._crop[2:]
+    fill = kwargs.get("fill", False)
+    edgecolor = kwargs.get("edgecolor", 'red')
+    r = _plt.Rectangle((c0, r0), c1-c0, r1-r0, edgecolor=edgecolor, fill=fill)
+    _plt.gca().add_artist(r)
