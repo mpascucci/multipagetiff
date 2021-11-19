@@ -25,11 +25,17 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
+from .main import read_stack
+
 from matplotlib import pyplot as plt
 from matplotlib import colorbar, colors
 import numpy as np
 from types import SimpleNamespace
 
+import numpy as _np
+import multiprocessing as _mp
+from tqdm import tqdm as _tqdm
+import functools as _ft
 
 config = SimpleNamespace(
     cmap=None
@@ -74,9 +80,9 @@ def color_code(stack, threshold=0):
             img = (img-img_min)/img_c
         img[img < threshold] = 0
         j = i/(stack.selection_length-1)
-        rgb[i,:,:,0] = img*cmap(j)[0]
-        rgb[i,:,:,1] = img*cmap(j)[1]
-        rgb[i,:,:,2] = img*cmap(j)[2]
+        rgb[i, :, :, 0] = img*cmap(j)[0]
+        rgb[i, :, :, 1] = img*cmap(j)[1]
+        rgb[i, :, :, 2] = img*cmap(j)[2]
 
     return rgb
 
@@ -108,22 +114,22 @@ def plot_flatten(stack, threshold=0):
     :param threshold: intensity values below the threshold are set to zero
     :return: None
     """
-    n=10
+    n = 10
     ax1 = plt.subplot2grid((n, n), (0, 0), colspan=n-1, rowspan=n)
     ax2 = plt.subplot2grid((n, n), (0, n-1), colspan=1, rowspan=n)
 
     ax1.imshow(flatten(stack, threshold=threshold))
     ax1.set_title(stack.title)
-    norm = colors.Normalize(vmin=stack.range_in_units[0], vmax=stack.range_in_units[1])
+    norm = colors.Normalize(
+        vmin=stack.range_in_units[0], vmax=stack.range_in_units[1])
     cb1 = colorbar.ColorbarBase(ax2, cmap=get_cmap(),
-                                    norm=norm,
-                                    orientation='vertical')
-   
+                                norm=norm,
+                                orientation='vertical')
+
     if stack.z_label:
         cb1.set_label("{}".format(stack.z_label))
     if stack.units:
         cb1.set_label("{} [{}]".format(stack.z_label, stack.units))
-        
 
 
 def plot_frames(stack, frames=None, colorcoded=False, **kwargs):
@@ -139,8 +145,8 @@ def plot_frames(stack, frames=None, colorcoded=False, **kwargs):
     else:
         imgs = stack.pages
 
-    MAX_IMGS = 36 # max images to show
-    
+    MAX_IMGS = 36  # max images to show
+
     if frames is not None:
         try:
             iter(frames)
@@ -150,19 +156,20 @@ def plot_frames(stack, frames=None, colorcoded=False, **kwargs):
         frames = range(len(imgs))
 
     if len(frames) > MAX_IMGS:
-        frames=frames[:MAX_IMGS]
+        frames = frames[:MAX_IMGS]
 
     n_imgs = len(frames)
 
     cols = min(n_imgs, 6)
     rows = min(6, int(np.floor(n_imgs/cols))+1)
 
-    for j,i in enumerate(frames):
-        img=imgs[i]
-        plt.subplot(rows,cols,j+1)
+    for j, i in enumerate(frames):
+        img = imgs[i]
+        plt.subplot(rows, cols, j+1)
         plt.imshow(img, **kwargs)
         plt.axis('off')
-        plt.text(0.05*img.shape[0],0.9*img.shape[1],str(i), {'bbox': dict(boxstyle="round", fc="white", ec="gray", pad=0.1)})
+        plt.text(0.05*img.shape[0], 0.9*img.shape[1], str(i),
+                 {'bbox': dict(boxstyle="round", fc="white", ec="gray", pad=0.1)})
 
     plt.tight_layout()
 
@@ -192,8 +199,28 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
     length = end-start
 
     xz = np.zeros((len(stack)*interpolation, length, 3))
-    for i,img in enumerate(color_code(stack)):
+    for i, img in enumerate(color_code(stack)):
         for j in range(i*interpolation, (i+1)*interpolation):
-            xz[j,:] = img[y,start:end]
+            xz[j, :] = img[y, start:end]
 
     return xz
+
+
+def load_and_apply(path, f=_np.sum, f_args={'axis': 0}):
+    "Load a tif stack and apply f to it"
+    stack = read_stack(path, dx=1, dz=1)
+    mean_img = f(stack.pages, **f_args)
+    return mean_img
+
+
+def load_and_apply_batch(paths, f=_np.sum, f_args={'axis': 0}, ncpu=None):
+    """Load tif stacks and apply a function to them"""
+
+    f = _ft.partial(load_and_apply, f=f, f_args=f_args)
+
+    # chose number of used CPUs
+    ncpu = _mp.cpu_count()*0.8 if ncpu is None else ncpu
+    ncpu = int(ncpu)
+
+    with _mp.Pool(ncpu) as pool:
+        return list(_tqdm(pool.imap(f, paths), total=len(paths), desc=f"Using {ncpu} CPUs"))

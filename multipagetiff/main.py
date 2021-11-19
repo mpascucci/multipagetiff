@@ -49,15 +49,24 @@ def tiff2nparray(patj):
     return np.array(frames)
 
 
+def read_stack(path, dx=1, dz=1, title='', z_label='depth', units=''):
+    """Load a stack form a tif file.
+
+    :param path: (string) path to the tiff file
+    :return: a Stack object
+    """
+    return Stack(tiff2nparray(path), dx=dx, dz=dz, title=title, z_label=z_label, units='')
+
+
 class Stack(Sequence):
     """The multipage tiff object.
     it behaves as a list which members are the pages of the tiff.
     Each page is a numpy array.
     """
 
-    def __init__(self, path, dx, dz, title='', z_label='depth', units=''):
+    def __init__(self, imgs, dx=1, dz=1, title='', z_label='depth', units=''):
         """
-        :param path: path to the tiff file
+        :param imgs: numpy array of shape (Nz, Nx, Ny) containing the frames of the stack
         :param dx: value of one pixel in physical units, on the transverse plane (X,Y)
         :param dz: value of one pixel in physical units, on the axial direction (Z)
         :param units: physical units of the z axis
@@ -71,8 +80,9 @@ class Stack(Sequence):
         - start_frame, end_frame : int, defines the first and last frame to use
         - keyframe: the frame at which z=0
         """
-        self._imgs = tiff2nparray(path)
-        self.crop=[0,0,*self._imgs[0].shape]
+
+        self._imgs = imgs
+        self.crop = [0, 0, *self._imgs[0].shape]
         self.keyframe = len(self)//2
         self.start_frame = 0
         self.end_frame = len(self) - 1
@@ -108,8 +118,8 @@ class Stack(Sequence):
 
     @property
     def pages(self):
-        x,y,h,w = self.crop
-        return self._imgs[:,x:x+h,y:y+w]
+        x, y, h, w = self.crop
+        return self._imgs[:, x:x+h, y:y+w]
 
     @property
     def selection_length(self):
@@ -118,4 +128,3 @@ class Stack(Sequence):
     @property
     def range_in_units(self):
         return np.array([self.start_frame-self.keyframe, self.end_frame-self.keyframe])*self.dz
-
