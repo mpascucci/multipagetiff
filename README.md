@@ -23,6 +23,7 @@ The following is a very short example of a depth colored z max-projection of an 
 
 ```python
 import multipagetiff as mtif
+from matplotlib import pyplot as plt
 # set the colormap
 s = mtif.read_stack("actin_filament.tif", dx=10, dz=50, units='nm')
 mtif.set_cmap(plt.cm.cool)
