@@ -296,7 +296,7 @@ st
 
 
 
-    Multi-Page Stack "balls" of 4 pages. (dx=dy=1, dz=1, crop=[0, 400, 0, 400]], page limits=[0, 3])
+    Multi-Page Stack "balls" of 3 pages. (dx=dy=1, dz=1, crop=[0, 400, 0, 400]], page limits=[0, 3])
 
 
 
