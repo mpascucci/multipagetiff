@@ -13,11 +13,6 @@ instal with `pip`
 pip install multipagetiff
 ```
 
-Or, in order to get the latest version, install it from git
-```
-pip install git+git://github.com/mpascucci/multipagetiff.git
-```
-
 ## Usage example
 
 # z max-projection
