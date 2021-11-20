@@ -19,4 +19,21 @@ pip install git+git://github.com/mpascucci/multipagetiff.git
 ```
 
 ## Usage example
-Please, have a look at this [detailed example](examples/markdown/example.md).
+
+# z max-projection
+
+Have a look at the [cookbook](examples/markdown/example.md), it contains examples and explications for a quick start.
+
+The following is a very short example of a depth colored z max-projection of an image stack:
+
+```python
+import multipagetiff as mtif
+# set the colormap
+s = mtif.read_stack("actin_filament.tif", dx=10, dz=50, units='nm')
+mtif.set_cmap(plt.cm.cool)
+# plot the stack
+mtif.plot_flatten(s)
+```
+    
+![png](examples/markdown/output_24_0.png)
+
