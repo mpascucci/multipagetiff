@@ -93,7 +93,7 @@ class Stack(Sequence):
         return self.pages[i]
 
     def __len__(self):
-        return self._crop[1] - self._crop[0] + 1
+        return self._crop[1] - self._crop[0]
 
     def set_start_in_units(self, start):
         self.start_page = self.keypage + round(start//self.dz) + 1
