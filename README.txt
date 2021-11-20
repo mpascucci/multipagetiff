@@ -1,8 +1,8 @@
 # Multi-page TIFF
 
-![image](https://github.com/mpascucci/multipagetiff/raw/master/imgs/output_19_0.png)
+![image](https://raw.githubusercontent.com/mpascucci/multipagetiff/dev/examples/markdown/output_45_0.png)
 
-This module module makes easy dealing with multi-page tiff images stacks.
+This module simplifies working with multipage images (stacks). Image stacks are often found as multi-page tiff files.
 
 It implements depth color-coding by max-projection, like the Z-projection functions of ImageJ.
 
@@ -10,6 +10,6 @@ Detailed description on the [GitHub project page](https://github.com/mpascucci/m
 
 typical import line:
 ```python
-import multipagetiff as tiff
+import multipagetiff as mtif
 ```
 
