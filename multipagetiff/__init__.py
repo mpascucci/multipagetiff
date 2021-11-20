@@ -27,3 +27,5 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 
 from .main import Stack
 from .stacktools import *
+from .plot import *
+from .io import *

@@ -27,6 +27,7 @@ along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
 
 from collections.abc import Sequence
 from PIL.Image import new
+from matplotlib.colors import Normalize
 from matplotlib.pyplot import title
 import numpy as _np
 from numpy.lib.shape_base import hsplit
@@ -61,6 +62,10 @@ class Stack(Sequence):
         self.title = title
         self.units = units
         self.z_label = z_label
+        # by setting this flag to TRUE the pages will be recalculated at next access
+        self._update_pages = True
+        self._normalize = False
+        self._dtype_out = 'same'
 
     def reverse(self):
         self._imgs = self.pages[::-1]
@@ -80,7 +85,9 @@ class Stack(Sequence):
         self.title = stack.title
         self.units = stack.units
         self.z_label = stack.z_label
-        self._crop = stack._crop
+        self._crop = stack._crop.copy()
+        self._normalize = stack._normalize
+        self._dtype_out = stack._dtype_out
 
     def __getitem__(self, i):
         return self.pages[i]
@@ -102,11 +109,11 @@ class Stack(Sequence):
                 raise ValueError(
                     "The images parameter is not a numpy array or is not convertible into one.")
         self._imgs = images
-        self._crop = [0, len(images)-1, 0, images[0].shape[0],
+        self._crop = [0, len(images), 0, images[0].shape[0],
                       0, images[0].shape[1]]
-        self._last_crop = self._crop.copy()
         self._lazy_pages = None
         self.keypage = len(self)//2
+        self._update_pages = True
 
     def copy(self):
         """Copy this stack into a new Stack instance"""
@@ -160,6 +167,8 @@ class Stack(Sequence):
             if limit is not None:
                 self._crop[i] = limit
 
+        self._update_pages = True
+
     def reset_selection(self):
         """reset the pages crop"""
         h, w = self._imgs[0].shape
@@ -178,25 +187,28 @@ class Stack(Sequence):
     def overwrite_raw_images(self):
         self._set_raw_images(self.pages)
 
-    def normalize(self, mode="all", output_dtype='same'):
+    def revert_pages(self):
+        """Revert the pages to undo direct modifications"""
+        self._update_pages = True
+
+    def _apply_normalization(self):
         """Normalize the gray levels of the stack.
         Pixel values will be rescaled between MIN and MAX.
-        MIN and MAX are the limits of the specified output_datatype.
-
-        output_dtype is a numpy datatype specifier or 'same' (which indicates the same as input)
-
-        mode:
-        - all : the stack is normalized as one array
-        - page : each page of the stack is normalized independently
-
+        MIN and MAX are the limits of the output_datatype property of this stack
+        (a numpy datatype specifier or 'same' (which indicates the same as input).
 
         NOTE: The normalization is calculated and applied on the selected pages (cropped)
         """
 
-        output_dtype = self.pages.dtype if output_dtype == 'same' else output_dtype
+        output_dtype = self._imgs.dtype if self._dtype_out == 'same' else self._dtype_out
 
-        min_level = _np.iinfo(output_dtype).min
-        max_level = _np.iinfo(output_dtype).max
+        try:
+            min_level = _np.iinfo(output_dtype).min
+            max_level = _np.iinfo(output_dtype).max
+        except ValueError:
+            # the output type is not an integer type
+            min_level = 0
+            max_level = 1
 
         imgs = self.pages.astype(_np.float64)
 
@@ -208,14 +220,35 @@ class Stack(Sequence):
         self._lazy_pages = imgs.astype(output_dtype)
 
     @ property
+    def normalize(self):
+        return self._normalize
+
+    @ normalize.setter
+    def normalize(self, v):
+        self._normalize = v
+        self._update_pages = True
+
+    @ property
+    def dtype_out(self):
+        return self._dtype_out
+
+    @ dtype_out.setter
+    def dtype_out(self, v):
+        self._dtype_out = v
+        self._update_pages = True
+
+    @ property
     def pages(self):
-        crop_changed = self._crop != self._last_crop
 
         # if the crop region has been modified
-        if crop_changed or self._lazy_pages is None:
+        if self._update_pages or (self._lazy_pages is None):
+            self._update_pages = False
+
             start, end, r0, r1, c0, c1 = self._crop
-            self._last_crop = self._crop.copy()
             self._lazy_pages = self._imgs[start:end, r0:r1, c0:c1]
+
+            if self.normalize:
+                self._apply_normalization()
 
         return self._lazy_pages
 
