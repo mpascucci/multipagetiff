@@ -31,7 +31,7 @@ def read_stack(path, dx=1, dz=1, title='', z_label='depth', units=''):
     :param path: (string) path to the tiff file
     :return: a Stack object
     """
-    return _stack.Stack(tiff2nparray(path), dx=dx, dz=dz, title=title, z_label=z_label, units='')
+    return _stack.Stack(tiff2nparray(path), dx=dx, dz=dz, title=title, z_label=z_label, units=units)
 
 
 def write_stack(stack, path="untitled.tif"):

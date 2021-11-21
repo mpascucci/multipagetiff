@@ -15,8 +15,6 @@ pip install multipagetiff
 
 ## Usage example
 
-# z max-projection
-
 Have a look at the [cookbook](examples/markdown/example.md), it contains examples and explications for a quick start.
 
 The following is a very short example of a depth colored z max-projection of an image stack:
@@ -30,6 +28,34 @@ mtif.set_cmap(plt.cm.cool)
 # plot the stack
 mtif.plot_flatten(s)
 ```
+
+
     
-![png](examples/markdown/output_24_0.png)
+![png](examples/markdown/short/output_3_0.png)
+    
+
+
+
+```python
+# set a crop
+s.crop_horizontal = 25,245
+s.crop_vertical = 25,225
+mtif.plot_selection(s)
+```
+
+
+    
+![png](examples/markdown/short/output_4_0.png)
+    
+
+
+
+```python
+mtif.plot_flatten(s)
+```
+
+
+    
+![png](examples/markdown/short/output_5_0.png)
+    
 

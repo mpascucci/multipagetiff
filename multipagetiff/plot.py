@@ -4,10 +4,16 @@ from matplotlib import colorbar, colors
 import numpy as _np
 
 
-def plot_selection(stack, page=0, plot_axis=None, **kwargs):
-    """Plot the crop region over a raw image of the stack"""
+def plot_selection(stack, page=None, plot_axis=None, **kwargs):
+    """Plot the crop region over a raw image of the stack
+
+    if page is None the stack is z-projected"""
     plot_axis = _plt.gca if plot_axis is None else plot_axis
-    _plt.imshow(stack._imgs[page])
+    if page is None:
+        img = stack._imgs.max(axis=0)
+    else:
+        img = stack._imgs[page]
+    _plt.imshow(img)
     r0, r1, c0, c1 = stack._crop[2:]
     fill = kwargs.get("fill", False)
     edgecolor = kwargs.get("edgecolor", 'red')
@@ -69,8 +75,9 @@ def flatten(stack, threshold=0):
     :param threshold: [0,1] intensity values below the threshold are set to zero
     :return: a numpy array
     """
-    idx = _np.argmax(stack.pages, axis=0)
-    out = _np.zeros((*stack.pages.shape[1:], 3))
+    imgs = stack.pages
+    idx = _np.argmax(imgs, axis=0)
+    out = _np.zeros((*imgs.shape[1:], 3))
     rgb = color_code(stack, threshold=threshold)
     for i in range(out.shape[0]):
         for j in range(out.shape[1]):
@@ -81,7 +88,9 @@ def flatten(stack, threshold=0):
 def plot_flatten(stack, threshold=0):
     """
     Plot the max projection and its color bar.
-    The labels are taken from the stack object properties.
+    The color map is defied in the cmap setting variable.
+    The color map limits are defined by the stack start_page, keypage and end_page property.
+    The labels are taken from the stack properties.
 
     :param stack:
     :param threshold: [0,1] intensity values below the threshold are set to zero
