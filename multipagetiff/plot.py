@@ -1,7 +1,9 @@
+import matplotlib.gridspec as _gridspec
 from .config import config as _config
 from matplotlib import pyplot as _plt
 from matplotlib import colorbar, colors
 import numpy as _np
+from .stacktools import get_orthogonal_slices as _get_orthogonal_slices
 
 
 def plot_selection(stack, page=None, plot_axis=None, **kwargs):
@@ -154,7 +156,7 @@ def plot_pages(stack, pages=None, colorcoded=False, **kwargs):
     _plt.tight_layout()
 
 
-def get_xz(stack, y, x=None, length=None, interpolation=1):
+def get_xz_color_coded(stack, y, x=None, length=None, interpolation=1):
     """
     Get a slice of the stack on the XZ plane
     :param stack:
@@ -184,3 +186,44 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
             xz[j, :] = img[y, start:end]
 
     return xz
+
+
+def orthogonal_views(stack, v, h, z):
+    """
+    Plot the ortogonal planes passin through the specified point.
+
+    v = vertical axis of the page (third dimension of pages array),
+    h = horizontal axis of the page (second dimension of pages array),
+    z = depth of the stack, page number (first dimension of pages array),
+    """
+
+    fig = _plt.gcf()
+    gs1 = _gridspec.GridSpec(2, 2)
+
+    orto = _get_orthogonal_slices(stack, v, h, z)
+
+    ax = fig.add_subplot(gs1[0])
+    av = 'v'
+    ah = 'h'
+    ax.imshow(orto[f'{av}{ah}'])
+    ax.scatter(h, v, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    ax = fig.add_subplot(gs1[1])
+    av = 'v'
+    ah = 'z'
+    ax.imshow(orto[f'{av}{ah}'])
+    ax.scatter(z, v, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    ax = fig.add_subplot(gs1[2])
+    av = 'z'
+    ah = 'h'
+    ax.imshow(orto[f'{av}{ah}'])
+    ax.scatter(h, z, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    _plt.tight_layout()

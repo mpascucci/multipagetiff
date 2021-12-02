@@ -148,18 +148,18 @@ class Stack(Sequence):
                  title='"{}" '.format(self.title) if self.title != '' else '', unit=self.units, crop=self._crop[2:], pages=self._crop[:2])
         return "Multi-Page Stack {title}of {length} pages. (dx=dy={dx}{unit}, dz={dz}{unit}, crop={crop}], page limits={pages})".format(**d)
 
-    def set_selection(self, region_limits):
+    def set_selection(self, start_page, end_page, vertical_start,
+                      vertical_end, horizontal_start, horizontal_end):
         """Set crop and page limits for this stack.
 
-        region_limits is an iterable of 6 elements that specifies the crop in the following form:
-        [start_page, end_page, vertical_start,
-            vertical_end, horizontal_start, horizontal_end]
-
-        start and end value are indices.
+        start and end values are indeces in the raw_image spaces.
         start values are included, end values are excluded.
 
         if any of the region_limits is None, the current value is kept.
         """
+
+        region_limits = [start_page, end_page, vertical_start,
+                         vertical_end, horizontal_start, horizontal_end]
 
         assert len(region_limits) == 6
 
@@ -168,6 +168,12 @@ class Stack(Sequence):
                 self._crop[i] = limit
 
         self._update_pages = True
+
+    def set_pages_selection(self, start_page, end_page):
+        """Set the limits of the current selected pages"""
+        assert end_page > start_page
+        self.start_page = start_page
+        self.end_page = end_page
 
     def reset_selection(self):
         """reset the pages crop"""
@@ -264,10 +270,19 @@ class Stack(Sequence):
 
         exp_len = ar_slice.stop - ar_slice.start
         assert len(value) == exp_len,\
-            "Expected an iterable of len({exp_len})".format()
+            "Expected len({exp_len}) values".format()
         crop = self._crop.copy()
         crop[ar_slice] = value
-        self.set_selection(crop)
+        self.set_selection(*crop)
+
+    def set_crop(self, vertical_start, vertical_end, horizontal_start, horizontal_end):
+        """Set the crop region of this stack.
+
+        start and end values are indeces in the raw_image spaces.
+        start is included, end is excluded.
+        """
+        self.crop = (vertical_start, vertical_end,
+                     horizontal_start, horizontal_end)
 
     @ property
     def crop(self):

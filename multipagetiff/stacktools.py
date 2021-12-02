@@ -54,3 +54,18 @@ def unpad_stack(stack):
     The padding is estimated from the first page"""
     pad = _image_tools.estimate_zero_padding(stack._imgs[0])
     stack.crop = [pad['v'][0], pad['v'][1], pad['h'][0], pad['h'][1]]
+
+
+def get_orthogonal_slices(stack, v, h, z):
+    """
+        Get the ortogonal planes passin through the specified point.
+
+        v = vertical axis of the page (third dimension of pages array),
+        h = horizontal axis of the page (second dimension of pages array),
+        z = depth of the stack, page number (first dimension of pages array),
+    """
+
+    vh = stack.pages[z, :, :]
+    zv = stack.pages[:, :, h]
+    zh = stack.pages[:, v, :]
+    return dict(vh=vh, zv=zv, zh=zh, vz=zv.T, hz=zh.T)
