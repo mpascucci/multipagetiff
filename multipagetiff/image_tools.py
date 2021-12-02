@@ -34,3 +34,24 @@ def unpad(img):
     hstart, hend = pad['h']
     vstart, vend = pad['v']
     return img[vstart:vend, hstart:hend]
+
+
+def normalize(ndarray, output_dtype='same'):
+    output_dtype = ndarray if output_dtype == 'same' else output_dtype
+
+    try:
+        min_level = _np.iinfo(output_dtype).min
+        max_level = _np.iinfo(output_dtype).max
+    except ValueError:
+        # the output type is not an integer type
+        min_level = 0
+        max_level = 1
+
+    imgs = ndarray.astype(_np.float64)
+
+    imgs -= ndarray.min()
+    imgs /= ndarray.max() - ndarray()
+    imgs *= max_level + min_level
+    imgs -= min_level
+
+    return imgs.astype(output_dtype)
