@@ -193,14 +193,15 @@ def get_xz_color_coded(stack, y, x=None, length=None, interpolation=1):
     return xz
 
 
-def orthogonal_views(stack, v=None, h=None, z=None):
+def orthogonal_views(stack, v=None, h=None, z=None, **kwargs):
     """
-    Plot the ortogonal planes passin through the specified point.
+    Plot orthogonal planes intersecting at the specified point.
 
     The point is specified by the following coordinates:
-    v = vertical axis of the page (third dimension of pages array),
-    h = horizontal axis of the page (second dimension of pages array),
+    v = vertical axis of the stack page (third dimension of pages array)
+    h = horizontal axis of the stack page (second dimension of pages array)
     z = depth of the stack, page number (first dimension of pages array)
+    **kwargs are forwarded to the pyplot.imshow function
 
     if a coordinate is missing, the center of that dimension is used.
 
@@ -223,7 +224,7 @@ def orthogonal_views(stack, v=None, h=None, z=None):
     ax = fig.add_subplot(gs1[0])
     av = 'v'
     ah = 'h'
-    ax.imshow(orto[f'{av}{ah}'])
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
     ax.scatter(h, v, facecolors='none', edgecolors='red')
     ax.set_ylabel(av)
     ax.set_xlabel(ah)
@@ -231,7 +232,7 @@ def orthogonal_views(stack, v=None, h=None, z=None):
     ax = fig.add_subplot(gs1[1])
     av = 'z'
     ah = 'v'
-    ax.imshow(orto[f'{av}{ah}'])
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
     ax.scatter(v, z, facecolors='none', edgecolors='red')
     ax.set_ylabel(av)
     ax.set_xlabel(ah)
@@ -239,7 +240,7 @@ def orthogonal_views(stack, v=None, h=None, z=None):
     ax = fig.add_subplot(gs1[2])
     av = 'z'
     ah = 'h'
-    ax.imshow(orto[f'{av}{ah}'])
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
     ax.scatter(h, z, facecolors='none', edgecolors='red')
     ax.set_ylabel(av)
     ax.set_xlabel(ah)
