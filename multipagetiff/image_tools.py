@@ -1,12 +1,20 @@
 import numpy as _np
 
 
+class EmptyImageException(ValueError):
+    pass
+
+
 def estimate_zero_padding(img):
     """Estimate horizontal and vertical padding in an image.
 
     Return value: a dictionary of two touples.
 
     """
+
+    if (img == 0).all():
+        raise EmptyImageException("The image is empty!")
+
     res = dict()
 
     # horizontal
