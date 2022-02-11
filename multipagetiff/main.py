@@ -152,7 +152,7 @@ class Stack(Sequence):
                       vertical_end, horizontal_start, horizontal_end):
         """Set crop and page limits for this stack.
 
-        start and end values are indeces in the raw_image spaces.
+        start and end values are indices in the raw_image spaces.
         start values are included, end values are excluded.
 
         if any of the region_limits is None, the current value is kept.
@@ -257,6 +257,11 @@ class Stack(Sequence):
                 self._apply_normalization()
 
         return self._lazy_pages
+
+    @property
+    def shape(self):
+        # the shape of the stack selection
+        return self.pages.shape
 
     def _crop_setter(self, ar_slice, value):
         """helper function for some property setters.
