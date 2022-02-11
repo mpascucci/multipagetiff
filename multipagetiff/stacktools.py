@@ -52,11 +52,21 @@ def empty_like(stack, value=0):
 def unpad_stack(stack):
     """Unpad the stack by setting an appropriate crop.
     The padding is estimated from the first page"""
-    pad = _image_tools.estimate_zero_padding(stack._imgs[0])
+
+    # Estimate the padding in a stack from the first non-empty image
+    for i in range(len(stack._imgs)):
+        try:
+            pad = _image_tools.estimate_zero_padding(stack._imgs[i])
+            break
+        except _image_tools.EmptyImageException:
+            continue
+    else:
+        raise ValueError("The stack seems empty")
+
     stack.crop = [pad['v'][0], pad['v'][1], pad['h'][0], pad['h'][1]]
 
 
-def get_orthogonal_slices(stack, v, h, z):
+def get_orthogonal_slices(stack, z, v, h):
     """
         Get the ortogonal planes passin through the specified point.
 
