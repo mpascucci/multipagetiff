@@ -35,14 +35,14 @@ s
 # plot the pages separately
 mtif.plot_pages(s)
 ```
-![png](examples/markdown/short/output_2_0.png)
+![png](examples/markdown/readme_demo/readme_demo_2_0.png)
     
 
 ```python
 # plot the z-max-projection
 mtif.plot_flatten(s)
 ```
-![png](examples/markdown/short/output_3_0.png)
+![png](examples/markdown/readme_demo/readme_demo_3_0.png)
     
 
 ```python
@@ -51,12 +51,28 @@ s.crop_horizontal = 25,245
 s.crop_vertical = 25,225
 mtif.plot_selection(s)
 ```    
-![png](examples/markdown/short/output_4_0.png)
+![png](examples/markdown/readme_demo/readme_demo_4_0.png)
     
 
 ```python
 mtif.plot_flatten(s)
 ```
-![png](examples/markdown/short/output_5_0.png)
+![png](examples/markdown/readme_demo/readme_demo_5_0.png)
+
+
+## Orthogonal views
+---
+
+
+```python
+# Plot orthogonal views of the stack.
+# i.e. 3 orthogona; slices intersecting at a specified point (stack's center by default)
+mtif.plot.orthogonal_views(s, cmap="gray")
+```
+
+
+    
+![png](examples/markdown/readme_demo/readme_demo_7_0.png)
+    
     
 

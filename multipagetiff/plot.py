@@ -1,7 +1,9 @@
+import matplotlib.gridspec as _gridspec
 from .config import config as _config
 from matplotlib import pyplot as _plt
 from matplotlib import colorbar, colors
 import numpy as _np
+from .stacktools import get_orthogonal_slices as _get_orthogonal_slices
 
 
 def plot_selection(stack, page=None, plot_axis=None, **kwargs):
@@ -66,9 +68,14 @@ def color_code(stack, threshold=0):
     return rgb
 
 
+def flatten_grayscale(stack):
+    """Return the 2D max projection of the intensity along the depth axis."""
+    return stack[:].max(axis=0)
+
+
 def flatten(stack, threshold=0):
     """
-    generate the max projection of a stack.
+    Return the color-coded max projection of the stack values along the depth axis.
     The color map is defied in the cmap setting variable.
     The color map limits are defined by the stack start_page, keypage and end_page property.
     :param stack:
@@ -154,7 +161,7 @@ def plot_pages(stack, pages=None, colorcoded=False, **kwargs):
     _plt.tight_layout()
 
 
-def get_xz(stack, y, x=None, length=None, interpolation=1):
+def get_xz_color_coded(stack, y, x=None, length=None, interpolation=1):
     """
     Get a slice of the stack on the XZ plane
     :param stack:
@@ -184,3 +191,58 @@ def get_xz(stack, y, x=None, length=None, interpolation=1):
             xz[j, :] = img[y, start:end]
 
     return xz
+
+
+def orthogonal_views(stack, v=None, h=None, z=None, **kwargs):
+    """
+    Plot orthogonal planes intersecting at the specified point.
+
+    The point is specified by the following coordinates:
+    v = vertical axis of the stack page (third dimension of pages array)
+    h = horizontal axis of the stack page (second dimension of pages array)
+    z = depth of the stack, page number (first dimension of pages array)
+    **kwargs are forwarded to the pyplot.imshow function
+
+    if a coordinate is missing, the center of that dimension is used.
+
+    """
+
+    fig = _plt.gcf()
+    gs1 = _gridspec.GridSpec(2, 2)
+
+    point = _np.array([z, v, h])
+
+    # the default point is in the middle of the stack
+    default_point = (_np.array(stack[:].shape)//2).astype(int)
+    # set default for unspecified coordinates
+    for i in range(len(point)):
+        if point[i] is None:
+            point[i] = default_point[i]
+
+    orto = _get_orthogonal_slices(stack, *point)
+
+    ax = fig.add_subplot(gs1[0])
+    av = 'v'
+    ah = 'h'
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
+    ax.scatter(h, v, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    ax = fig.add_subplot(gs1[1])
+    av = 'z'
+    ah = 'v'
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
+    ax.scatter(v, z, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    ax = fig.add_subplot(gs1[2])
+    av = 'z'
+    ah = 'h'
+    ax.imshow(orto[f'{av}{ah}'], **kwargs)
+    ax.scatter(h, z, facecolors='none', edgecolors='red')
+    ax.set_ylabel(av)
+    ax.set_xlabel(ah)
+
+    _plt.tight_layout()

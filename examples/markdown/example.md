@@ -32,7 +32,7 @@ mtif.plot_pages(s, cmap='gray')
 
 
     
-![png](output_5_0.png)
+![png](example_files/example_5_0.png)
     
 
 
@@ -97,7 +97,7 @@ plt.imshow(page);
 
 
     
-![png](output_13_0.png)
+![png](example_files/example_13_0.png)
     
 
 
@@ -144,7 +144,7 @@ plt.colorbar()
 
 
     
-![png](output_16_1.png)
+![png](example_files/example_16_1.png)
     
 
 
@@ -172,7 +172,7 @@ plt.colorbar()
 
 
     
-![png](output_18_1.png)
+![png](example_files/example_18_1.png)
     
 
 
@@ -258,7 +258,7 @@ mtif.plot_flatten(s)
 
 
     
-![png](output_24_0.png)
+![png](example_files/example_24_0.png)
     
 
 
@@ -279,7 +279,7 @@ mtif.plot_flatten(s, threshold=0.25)
 
 
     
-![png](output_26_0.png)
+![png](example_files/example_26_0.png)
     
 
 
@@ -296,7 +296,7 @@ st
 
 
 
-    Multi-Page Stack "balls" of 3 pages. (dx=dy=1, dz=1, crop=[0, 400, 0, 400]], page limits=[0, 3])
+    Multi-Page Stack "balls" of 4 pages. (dx=dy=1, dz=1, crop=[0, 400, 0, 400]], page limits=[0, 3])
 
 
 
@@ -317,7 +317,7 @@ plt.tight_layout()
 
 
     
-![png](output_32_0.png)
+![png](example_files/example_32_0.png)
     
 
 
@@ -330,7 +330,7 @@ mtif.plot_pages(st, cmap='gray')
 
 
     
-![png](output_34_0.png)
+![png](example_files/example_34_0.png)
     
 
 
@@ -351,7 +351,7 @@ plt.tight_layout()
 
 
     
-![png](output_36_0.png)
+![png](example_files/example_36_0.png)
     
 
 
@@ -362,7 +362,7 @@ mtif.plot_pages(st, colorcoded=True)
 
 
     
-![png](output_37_0.png)
+![png](example_files/example_37_0.png)
     
 
 
@@ -378,7 +378,7 @@ plt.imshow(mp);
 
 
     
-![png](output_40_0.png)
+![png](example_files/example_40_0.png)
     
 
 
@@ -391,7 +391,7 @@ mtif.plot_flatten(st)
 
 
     
-![png](output_42_0.png)
+![png](example_files/example_42_0.png)
     
 
 
@@ -407,7 +407,7 @@ mtif.plot_flatten(st)
 
 
     
-![png](output_45_0.png)
+![png](example_files/example_45_0.png)
     
 
 
@@ -425,6 +425,6 @@ mtif.plot_flatten(st)
 
 
     
-![png](output_47_0.png)
+![png](example_files/example_47_0.png)
     
 
