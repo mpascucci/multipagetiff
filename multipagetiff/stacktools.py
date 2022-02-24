@@ -50,7 +50,7 @@ def empty_like(stack, value=0):
 
 
 def unpad_stack(stack):
-    """Unpad the stack by setting an appropriate crop.
+    """Un-pad the stack by setting an appropriate crop.
     The padding is estimated from the first page"""
 
     # Estimate the padding in a stack from the first non-empty image
@@ -68,7 +68,7 @@ def unpad_stack(stack):
 
 def get_orthogonal_slices(stack, z, v, h):
     """
-        Get the ortogonal planes passin through the specified point.
+        Get the orthogonal planes passing through the specified point.
 
         v = vertical axis of the page (third dimension of pages array),
         h = horizontal axis of the page (second dimension of pages array),
