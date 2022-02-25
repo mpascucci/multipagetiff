@@ -260,8 +260,8 @@ class Stack(Sequence):
         return self.pages.shape
 
     def _crop_setter(self, ar_slice, value):
-        """helper function for some property setters.
-        This function is there su ensure that the selection regions are properly set."""
+        """helper function for property setters.
+        This function ensures that the selection regions are properly set."""
 
         # ensure iterability
         try:
@@ -284,6 +284,15 @@ class Stack(Sequence):
         """
         self.crop = (vertical_start, vertical_end,
                      horizontal_start, horizontal_end)
+
+    def set_crop_vertical(self, start, end):
+        self.crop_vertical = [start, end]
+
+    def set_crop_horizontal(self, start, end):
+        self.crop_horizontal = [start, end]
+
+    def set_page_limits(self, start, end):
+        self.page_limits = [start, end]
 
     @ property
     def crop(self):
