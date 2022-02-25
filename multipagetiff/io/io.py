@@ -25,7 +25,7 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-from . import main as _stack
+from .. import stack as _stack
 from PIL import Image as _Image
 import numpy as _np
 import multiprocessing as _mp

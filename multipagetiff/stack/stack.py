@@ -26,11 +26,7 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 from collections.abc import Sequence
-from PIL.Image import new
-from matplotlib.colors import Normalize
-from matplotlib.pyplot import title
 import numpy as _np
-from numpy.lib.shape_base import hsplit
 
 
 class Stack(Sequence):

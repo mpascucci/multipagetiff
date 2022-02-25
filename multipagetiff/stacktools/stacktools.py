@@ -25,8 +25,8 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-from . import main as _stack
-from . import image_tools as _image_tools
+from .. import stack as _stack
+from .. import image_tools as _image_tools
 
 
 import numpy as _np
