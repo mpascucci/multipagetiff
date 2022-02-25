@@ -26,11 +26,11 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import matplotlib.gridspec as _gridspec
-from .config import config as _config
+from ..config import config as _config
 from matplotlib import pyplot as _plt
 from matplotlib import colorbar, colors
 import numpy as _np
-from .stacktools import get_orthogonal_slices as _get_orthogonal_slices
+from ..stacktools import _get_orthogonal_slices
 
 
 def plot_selection(stack, page=None, plot_axis=None, **kwargs):

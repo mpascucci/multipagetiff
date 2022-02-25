@@ -66,7 +66,7 @@ def unpad_stack(stack):
     stack.crop = [pad['v'][0], pad['v'][1], pad['h'][0], pad['h'][1]]
 
 
-def get_orthogonal_slices(stack, z, v, h):
+def _get_orthogonal_slices(stack, z, v, h):
     """
         Get the orthogonal planes passing through the specified point.
 

@@ -25,7 +25,8 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
-from .main import Stack
+from .stack import Stack
 from .stacktools import *
 from .plot import *
 from .io import *
+from .config import config
