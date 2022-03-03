@@ -29,11 +29,8 @@ from .main import Stack
 from .stacktools import *
 from .plot import *
 from .io import *
-<<<<<<< Updated upstream
-=======
 from .config import config
 
 DEPTH_AXIS = 0
 VERTICAL_AXIS = 1
 HORIZONTAL_AXIS = 2
->>>>>>> Stashed changes
