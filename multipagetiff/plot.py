@@ -70,7 +70,7 @@ def set_cmap(cmap):
     _config.cmap = cmap
 
 
-def color_code(stack, threshold=0):
+def color_code(stack, threshold=0, axis=0):
     """
     Color code the pages of a multipage grayscale tiff image
     :param stack:
@@ -78,7 +78,15 @@ def color_code(stack, threshold=0):
     :return: a rgb multipage image (numpy array)
     """
     cmap = get_cmap()
-    selection = stack.pages
+    selection = stack.pages.copy()
+    # selection = selection.swapaxes(axis, 0)
+    if axis != 0:
+        selection = _np.rot90(selection, axes=(0, axis))
+    if axis == 2:
+        selection = _np.rot90(selection, axes=(2, 1))
+
+    s = selection.shape[0]
+
     rgb = _np.zeros((*selection.shape, 3))
     for i, img in enumerate(selection):
         img_min = img.min()
@@ -87,7 +95,7 @@ def color_code(stack, threshold=0):
         if (img_c != 0):
             img = (img-img_min)/img_c
         img[img < threshold] = 0
-        j = i/(stack.selection_length-1)
+        j = i/s
         rgb[i, :, :, 0] = img*cmap(j)[0]
         rgb[i, :, :, 1] = img*cmap(j)[1]
         rgb[i, :, :, 2] = img*cmap(j)[2]
@@ -95,49 +103,74 @@ def color_code(stack, threshold=0):
     return rgb
 
 
-def flatten_grayscale(stack):
-    """Return the 2D max projection of the intensity along the depth axis."""
-    return stack[:].max(axis=0)
-
-
-def flatten(stack, threshold=0):
+def flatten_grayscale(stack, axis=0):
+    """Return the 2D max projection of the intensity along the specified axis.
+    depth = 0
+    vertical = 1
+    horizontal = 2
     """
-    Return the color-coded max projection of the stack values along the depth axis.
+    return stack[:].max(axis=axis)
+
+
+def flatten(stack, threshold=0, axis=0):
+    """
+    Return the color-coded max projection of the stack values along the specified axis
+    (depth = 0, vertical = 1, horizontal = 2).
+
     The color map is defied in the cmap setting variable.
     The color map limits are defined by the stack start_page, keypage and end_page property.
-    :param stack:
+    :param stack: a Stack
     :param threshold: [0,1] intensity values below the threshold are set to zero
     :return: a numpy array
     """
-    imgs = stack.pages
+    imgs = stack.pages.copy()
+    # imgs = imgs.swapaxes(axis, 0)
+    if axis != 0:
+        imgs = _np.rot90(imgs, axes=(0, axis))
+    if axis == 2:
+        imgs = _np.rot90(imgs, axes=(2, 1))
     idx = _np.argmax(imgs, axis=0)
-    out = _np.zeros((*imgs.shape[1:], 3))
-    rgb = color_code(stack, threshold=threshold)
+    # the output rgb image
+    rgb = color_code(stack, threshold=threshold, axis=axis)
+    out = _np.zeros((*rgb.shape[1:3], 3))
+
     for i in range(out.shape[0]):
         for j in range(out.shape[1]):
             out[i, j, :] = rgb[idx[i, j], i, j]
     return out
 
 
-def plot_flatten(stack, threshold=0):
-    """
-    Plot the max projection and its color bar.
+def plot_flatten(stack, threshold=0, axis=0):
+    """Plot the max projection and its color bar.
+
+    The projection is done along the specified axis.
     The color map is defied in the cmap setting variable.
     The color map limits are defined by the stack start_page, keypage and end_page property.
     The labels are taken from the stack properties.
 
     :param stack:
-    :param threshold: [0,1] intensity values below the threshold are set to zero
+    :param threshold:
     :return: None
+
+    Args:
+        stack (Stack): a Stack
+        threshold (int, optional): [0,1] intensity values below the threshold are set to zero. Defaults to 0.
+        axis (int, optional): The axis of the projection (depth = 0, vertical = 1, horizontal = 2). Defaults to 0.
     """
+
     n = 10
     ax1 = _plt.subplot2grid((n, n), (0, 0), colspan=n-1, rowspan=n)
     ax2 = _plt.subplot2grid((n, n), (0, n-1), colspan=1, rowspan=n)
 
-    ax1.imshow(flatten(stack, threshold=threshold))
+    ax1.imshow(flatten(stack, threshold=threshold, axis=axis))
     ax1.set_title(stack.title)
-    norm = colors.Normalize(
-        vmin=stack.range_in_units[0], vmax=stack.range_in_units[1])
+    if axis == 0:
+        norm = colors.Normalize(
+            vmin=stack.range_in_units[0], vmax=stack.range_in_units[1])
+    else:
+        s = stack.pages.shape[axis]/2
+        norm = colors.Normalize(
+            vmin=-s*stack.dx, vmax=s*stack.dx,)
     cb1 = colorbar.ColorbarBase(ax2, cmap=get_cmap(),
                                 norm=norm,
                                 orientation='vertical')
@@ -209,7 +242,6 @@ def get_xz_color_coded(stack, y, x=None, length=None, interpolation=1):
 
     start = max(0, x-length//2)
     end = min(x+length//2, stack[0].shape[1])
-
     length = end-start
 
     xz = _np.zeros((len(stack)*interpolation, length, 3))

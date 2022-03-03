@@ -30,37 +30,81 @@ from matplotlib import pyplot as plt
 s = mtif.read_stack("spiral.tif", units='um')
 s
 ```
+
+
+
+
     Multi-Page Stack of 101 pages. (dx=dy=1um, dz=1um, crop=[0, 301, 0, 301]], page limits=[0, 101])
+
+
+
+
 ```python
 # plot the pages separately
 mtif.plot_pages(s)
 ```
+
+
+    
 ![png](examples/markdown/readme_demo/readme_demo_2_0.png)
     
+
+
 
 ```python
 # plot the z-max-projection
 mtif.plot_flatten(s)
 ```
-![png](examples/markdown/readme_demo/readme_demo_3_0.png)
+
+    (101, 301, 301, 3)
+
+
+
     
+![png](examples/markdown/readme_demo/readme_demo_3_1.png)
+    
+
+
 
 ```python
 # set a crop
 s.crop_horizontal = 25,245
 s.crop_vertical = 25,225
 mtif.plot_selection(s)
-```    
+```
+
+
+    
 ![png](examples/markdown/readme_demo/readme_demo_4_0.png)
     
+
+
 
 ```python
 mtif.plot_flatten(s)
 ```
-![png](examples/markdown/readme_demo/readme_demo_5_0.png)
+
+    (101, 200, 220, 3)
 
 
-## Orthogonal views
+
+    
+![png](examples/markdown/readme_demo/readme_demo_5_1.png)
+    
+
+
+
+```python
+mtif.plot_flatten(s, axis=1)
+```
+
+
+    
+![png](examples/markdown/readme_demo/readme_demo_6_1.png)
+    
+
+
+# Orthogonal views
 ---
 
 
@@ -72,7 +116,5 @@ mtif.plot.orthogonal_views(s, cmap="gray")
 
 
     
-![png](examples/markdown/readme_demo/readme_demo_7_0.png)
+![png](examples/markdown/readme_demo/readme_demo_8_0.png)
     
-    
-
