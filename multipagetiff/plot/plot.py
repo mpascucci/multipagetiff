@@ -332,20 +332,4 @@ def orthogonal_project(stack, depth_color_coded=False, **kwargs):
         ax.set_ylabel(axis_names[i][0])
         ax.set_xlabel(axis_names[i][1])
 
-    # ax = fig.add_subplot(gs1[1])
-    # av = 'z'
-    # ah = 'v'
-    # ax.imshow(orto[f'{av}{ah}'], **kwargs)
-    # ax.scatter(v, z, facecolors='none', edgecolors='red')
-    # ax.set_ylabel(av)
-    # ax.set_xlabel(ah)
-
-    # ax = fig.add_subplot(gs1[2])
-    # av = 'z'
-    # ah = 'h'
-    # ax.imshow(orto[f'{av}{ah}'], **kwargs)
-    # ax.scatter(h, z, facecolors='none', edgecolors='red')
-    # ax.set_ylabel(av)
-    # ax.set_xlabel(ah)
-
     _plt.tight_layout()
