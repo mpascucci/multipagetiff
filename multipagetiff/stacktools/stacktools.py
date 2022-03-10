@@ -25,8 +25,10 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 
 """
 
+from multipagetiff.stack.stack import Stack
 from .. import stack as _stack
 from .. import image_tools as _image_tools
+from .. import transform
 
 
 import numpy as _np
@@ -79,3 +81,12 @@ def _get_orthogonal_slices(stack, z, v, h):
     zv = stack.pages[:, :, h]
     zh = stack.pages[:, v, :]
     return dict(vh=vh, zv=zv, zh=zh, vz=zv.T, hz=zh.T)
+
+
+def affine_transform(stack, matrix):
+    """Apply a 3D affine transformation to the pages of the input stack.
+    Return the result in a new stack."""
+
+    img = stack.pages.copy()
+    out = transform.affine3D(img, matrix)
+    return Stack(out)

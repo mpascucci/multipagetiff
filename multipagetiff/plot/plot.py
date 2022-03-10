@@ -70,25 +70,13 @@ def set_cmap(cmap):
     _config.cmap = cmap
 
 
-def color_code(stack, threshold=0, axis=0):
-    """
-    Color code the pages of a multipage grayscale tiff image
-    :param stack:
-    :param threshold: [0,1] intensity values below the threshold are set to zero
-    :return: a rgb multipage image (numpy array)
-    """
+def color_code_ndarray(ndarray, threshold=0, axis=0):
     cmap = get_cmap()
-    selection = stack.pages.copy()
-    # selection = selection.swapaxes(axis, 0)
-    if axis != 0:
-        selection = _np.rot90(selection, axes=(0, axis))
-    if axis == 2:
-        selection = _np.rot90(selection, axes=(2, 1))
 
-    s = selection.shape[0]
+    s = ndarray.shape[0]
 
-    rgb = _np.zeros((*selection.shape, 3))
-    for i, img in enumerate(selection):
+    rgb = _np.zeros((*ndarray.shape, 3))
+    for i, img in enumerate(ndarray):
         img_min = img.min()
         img_max = img.max()
         img_c = img_max - img_min
@@ -103,6 +91,25 @@ def color_code(stack, threshold=0, axis=0):
     return rgb
 
 
+def color_code(stack, threshold=0, axis=0):
+    """
+    Color code the pages of a multipage grayscale tiff image
+    :param stack:
+    :param threshold: [0,1] intensity values below the threshold are set to zero
+    :return: a rgb multipage image (numpy array)
+    """
+
+    selection = stack.pages.copy()
+
+    # rotate the array
+    if axis != 0:
+        selection = _np.rot90(selection, axes=(0, axis))
+    if axis == 2:
+        selection = _np.rot90(selection, axes=(2, 1))
+
+    return color_code_ndarray(selection, threshold, axis)
+
+
 def flatten_grayscale(stack, axis=0):
     """Return the 2D max projection of the intensity along the specified axis.
     depth = 0
@@ -112,7 +119,7 @@ def flatten_grayscale(stack, axis=0):
     return stack[:].max(axis=axis)
 
 
-def flatten(stack, threshold=0, axis=0):
+def flatten(stack, threshold=0, axis=0, rotate_axis_2=False):
     """
     Return the color-coded max projection of the stack values along the specified axis
     (depth = 0, vertical = 1, horizontal = 2).
@@ -127,11 +134,11 @@ def flatten(stack, threshold=0, axis=0):
     # imgs = imgs.swapaxes(axis, 0)
     if axis != 0:
         imgs = _np.rot90(imgs, axes=(0, axis))
-    if axis == 2:
+    if (axis == 2) and rotate_axis_2:
         imgs = _np.rot90(imgs, axes=(2, 1))
     idx = _np.argmax(imgs, axis=0)
     # the output rgb image
-    rgb = color_code(stack, threshold=threshold, axis=axis)
+    rgb = color_code_ndarray(imgs, threshold=threshold, axis=axis)
     out = _np.zeros((*rgb.shape[1:3], 3))
 
     for i in range(out.shape[0]):
@@ -162,7 +169,8 @@ def plot_flatten(stack, threshold=0, axis=0):
     ax1 = _plt.subplot2grid((n, n), (0, 0), colspan=n-1, rowspan=n)
     ax2 = _plt.subplot2grid((n, n), (0, n-1), colspan=1, rowspan=n)
 
-    ax1.imshow(flatten(stack, threshold=threshold, axis=axis))
+    ax1.imshow(flatten(stack, threshold=threshold,
+               axis=axis, rotate_axis_2=True))
     ax1.set_title(stack.title)
     if axis == 0:
         norm = colors.Normalize(
@@ -303,5 +311,25 @@ def orthogonal_views(stack, v=None, h=None, z=None, **kwargs):
     ax.scatter(h, z, facecolors='none', edgecolors='red')
     ax.set_ylabel(av)
     ax.set_xlabel(ah)
+
+    _plt.tight_layout()
+
+
+def orthogonal_project(stack, depth_color_coded=False, **kwargs):
+    fig = _plt.gcf()
+    gs1 = _gridspec.GridSpec(2, 2)
+
+    axis_names = ('yx', 'zx', 'zy')
+
+    for i in range(3):
+        ax = fig.add_subplot(gs1[i])
+        if depth_color_coded:
+            img = flatten(stack, axis=i)
+        else:
+            img = flatten_grayscale(stack, axis=i)
+
+        ax.imshow(img, **kwargs)
+        ax.set_ylabel(axis_names[i][0])
+        ax.set_xlabel(axis_names[i][1])
 
     _plt.tight_layout()
