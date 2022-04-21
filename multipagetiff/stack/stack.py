@@ -250,7 +250,12 @@ class Stack(Sequence):
             self._lazy_pages = self._imgs[start:end, r0:r1, c0:c1]
 
             if self.normalize:
+                # normalization also changes the data type
                 self._apply_normalization()
+            elif self._dtype_out != "same":
+                # only change data type
+                self._lazy_pages = self._lazy_pages.astype(self._dtype_out)
+
 
         return self._lazy_pages
 

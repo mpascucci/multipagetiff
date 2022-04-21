@@ -38,7 +38,12 @@ def tiff2nparray(path):
     :param path: path of the tiff file
     :return: a numpy array of shape (n,h,w) where n is the number of pages of the tiff file
     """
-    im = _Image.open(path)
+
+    try:
+        im = _Image.open(path)
+    except _Image.UnidentifiedImageError as e:
+        # tiff file is probably not a 3D stack
+        raise(e)
     i = 0
     frames = []
     try:
