@@ -257,7 +257,7 @@ class Stack(Sequence):
                 # normalization also changes the data type
                 log.info("normalizing stack")
                 self._apply_normalization()
-            elif self._dtype_out != "same":
+            elif str(self._dtype_out) != "same":
                 log.info(f"casting stack to type {self._dtype_out}")
                 # only change data type
                 self._lazy_pages = self._lazy_pages.astype(self._dtype_out)
