@@ -29,7 +29,7 @@ from collections.abc import Sequence
 import numpy as _np
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
 class Stack(Sequence):
