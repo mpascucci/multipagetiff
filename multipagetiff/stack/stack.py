@@ -64,7 +64,7 @@ class Stack(Sequence):
         # by setting this flag to TRUE the pages will be recalculated at next access
         self._update_pages = True
         self._normalize = False
-        self._dtype_out = 'same'
+        self._dtype_out = "same"
 
     def reverse(self):
         self._imgs = self.pages[::-1]
