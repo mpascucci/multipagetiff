@@ -53,7 +53,11 @@ def empty_like(stack, value=0):
 
 def unpad_stack(stack):
     """Un-pad the stack by setting an appropriate crop.
-    The padding is estimated from the first page"""
+    The padding is estimated from the first non-empty page.
+    The unpadding is done inplace.
+    
+    Return:
+        None"""
 
     # Estimate the padding in a stack from the first non-empty image
     for i in range(len(stack._imgs)):
