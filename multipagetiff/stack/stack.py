@@ -27,7 +27,10 @@ along with MULTIPAGETIFF.  If not, see <https://www.gnu.org/licenses/>.
 
 from collections.abc import Sequence
 import numpy as _np
+import logging
 
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 class Stack(Sequence):
     """The multipage tiff object.
@@ -244,6 +247,7 @@ class Stack(Sequence):
 
         # if the crop region has been modified
         if self._update_pages or (self._lazy_pages is None):
+            log.info("updating pages")
             self._update_pages = False
 
             start, end, r0, r1, c0, c1 = self._crop
@@ -251,8 +255,10 @@ class Stack(Sequence):
 
             if self.normalize:
                 # normalization also changes the data type
+                log.info("normalizing stack")
                 self._apply_normalization()
             elif self._dtype_out != "same":
+                log.info(f"casting stack to type {self._dtype_out}")
                 # only change data type
                 self._lazy_pages = self._lazy_pages.astype(self._dtype_out)
 
