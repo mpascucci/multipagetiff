@@ -247,7 +247,7 @@ class Stack(Sequence):
 
         # if the crop region has been modified
         if self._update_pages or (self._lazy_pages is None):
-            log.info("updating pages")
+            log.debug("accessing pages")
             self._update_pages = False
 
             start, end, r0, r1, c0, c1 = self._crop
