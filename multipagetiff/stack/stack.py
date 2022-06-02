@@ -32,6 +32,7 @@ import logging
 logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
 
+
 class Stack(Sequence):
     """The multipage tiff object.
     it behaves as a list which members are the pages of the tiff.
@@ -198,9 +199,14 @@ class Stack(Sequence):
 
     def _apply_normalization(self):
         """Normalize the gray levels of the stack.
+
         Pixel values will be rescaled between MIN and MAX.
-        MIN and MAX are the limits of the output_datatype property of this stack
-        (a numpy datatype specifier or 'same' (which indicates the same as input).
+        The values of MIN and MAX depend on the data type of the stack.
+
+        if the data type is float: MIN=0, MAX=1
+
+        if the data type is integer:
+        MIN and MAX are the limits of the data-type of this stack
 
         NOTE: The normalization is calculated and applied on the selected pages (cropped)
         """
@@ -244,11 +250,11 @@ class Stack(Sequence):
 
     def set_dtype(self, t):
         """Set the data type of the pages of this stack.
-        
+
         Params:
-        t must by a numpy-style type definition, for example numpy.uint8 or 'float'        
+        t : a numpy datatype specifier or 'same' (which indicates the same as the initial stack).
         """
-        
+
         try:
             _np.zeros(2, dtype=t)
             self.dtype_out = t
@@ -257,11 +263,19 @@ class Stack(Sequence):
 
     def set_normalization(self, on=True):
         """If true, the stack will be normalized.
-        
-        After normalization, max and min values of the stack will
-        correspond to the max and min values of its data type.
+
+        Pixel values will be rescaled between MIN and MAX.
+        The values of MIN and MAX depend on the data type of the stack.
+
+        - if the data type is float:
+            MIN=0, MAX=1
+
+        - if the data type is integer:
+            MIN and MAX are the limits of the data-type of this stack
+
+        NOTE: The normalization is calculated and applied on the selected pages (cropped)
         """
-        self.normalize=True
+        self.normalize = True
 
     @ property
     def pages(self):
@@ -282,7 +296,6 @@ class Stack(Sequence):
                 log.info(f"casting stack to type {self._dtype_out}")
                 # only change data type
                 self._lazy_pages = self._lazy_pages.astype(self._dtype_out)
-
 
         return self._lazy_pages
 
