@@ -4,7 +4,7 @@ with open("README.txt", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='multipagetiff',
-                 version='3.0.8',
+                 version='3.0.9',
                  description='open multipage tiff stacks and create z-projections',
                  author='Marco Pascucci',
                  long_description=long_description,

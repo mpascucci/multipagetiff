@@ -242,6 +242,27 @@ class Stack(Sequence):
         self._dtype_out = v
         self._update_pages = True
 
+    def set_dtype(self, t):
+        """Set the data type of the pages of this stack.
+        
+        Params:
+        t must by a numpy-style type definition, for example numpy.uint8 or 'float'        
+        """
+        
+        try:
+            _np.zeros(2, dtype=t)
+            self.dtype_out = t
+        except:
+            raise TypeError(f"{t} is not a valid type.")
+
+    def set_normalization(self, on=True):
+        """If true, the stack will be normalized.
+        
+        After normalization, max and min values of the stack will
+        correspond to the max and min values of its data type.
+        """
+        self.normalize=True
+
     @ property
     def pages(self):
 
