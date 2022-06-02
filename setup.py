@@ -12,7 +12,7 @@ setuptools.setup(name='multipagetiff',
                  author_email='marpas.paris@gmail.com',
                  url='https://github.com/mpascucci/multipagetiff',
                  packages=setuptools.find_packages(),
-                 install_requires=['numpy', 'matplotlib', 'tqdm'],
+                 install_requires=['numpy', 'matplotlib', 'tqdm', 'scipy'],
                  classifiers=[
                      "Programming Language :: Python",
                      "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
