@@ -1,1 +1,1 @@
-from .stack import Stack
+from .stack import Stack, log

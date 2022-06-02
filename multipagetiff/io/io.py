@@ -38,7 +38,12 @@ def tiff2nparray(path):
     :param path: path of the tiff file
     :return: a numpy array of shape (n,h,w) where n is the number of pages of the tiff file
     """
-    im = _Image.open(path)
+
+    try:
+        im = _Image.open(path)
+    except _Image.UnidentifiedImageError as e:
+        # tiff file is probably not a 3D stack
+        raise(e)
     i = 0
     frames = []
     try:
@@ -81,7 +86,7 @@ def load_and_apply(path, f, **kwargs):
     return retval
 
 
-def load_and_apply_batch(paths, f=_np.sum, ncpu=None, **kwargs):
+def load_and_apply_batch(paths, f=_np.sum, ncpu=None, progress_bar=False, **kwargs):
     """Load tif stacks and apply function f to each of them.
 
     f is a function that takes as input the pages of a stack (i.e. a 3D numpy array)
@@ -91,8 +96,15 @@ def load_and_apply_batch(paths, f=_np.sum, ncpu=None, **kwargs):
     f = _ft.partial(load_and_apply, f=f, **kwargs)
 
     # chose number of used CPUs
-    ncpu = _mp.cpu_count()*0.8 if ncpu is None else ncpu
+    ncpu = _mp.cpu_count() - 3 if ncpu is None else ncpu
     ncpu = int(ncpu)
 
+    results = None
+
     with _mp.Pool(ncpu) as pool:
-        return list(_tqdm(pool.imap(f, paths), total=len(paths), desc=f"Using {ncpu} CPUs"))
+        if progress_bar:
+            results = list(_tqdm(pool.imap(f, paths), total=len(paths), desc=f"Using {ncpu} CPUs"))
+        else:
+            results = pool.map(f, paths)
+
+    return results
