@@ -4,7 +4,7 @@ with open("README.txt", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='multipagetiff',
-                 version='3.0.8',
+                 version='3.0.9',
                  description='open multipage tiff stacks and create z-projections',
                  author='Marco Pascucci',
                  long_description=long_description,
@@ -12,7 +12,7 @@ setuptools.setup(name='multipagetiff',
                  author_email='marpas.paris@gmail.com',
                  url='https://github.com/mpascucci/multipagetiff',
                  packages=setuptools.find_packages(),
-                 install_requires=['numpy', 'matplotlib', 'tqdm'],
+                 install_requires=['numpy', 'matplotlib', 'tqdm', 'scipy'],
                  classifiers=[
                      "Programming Language :: Python",
                      "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
